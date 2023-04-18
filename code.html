@@ -348,9 +348,50 @@ const saveNewEvent = () => {
           </pre>
         </div>
         <div class="col-12 col-lg-4">
-          <p>The code is structured in one function</p>
-          <h5>displayMessage</h5>
-          <p>prints out the message</p>
+          <p>
+            Each task in this application being executed needs specific
+            instructions, so keeping these concerns carefully organized in
+            different functions is of primary importance for readability.
+            <br /><br />
+            Some of the functions are for display purposes, and others are for
+            fetching data. Others still, are designed to sort through data to
+            only present content that the user wants.
+            <br /><br />
+            Overall, I think the most interesting aspect of this application is
+            how it saves data that the user enters, using only JavaScript, which
+            is not a back end language. Much like how websites can store cookies
+            on your device, this app keeps note on your own machine of any
+            changes you've made to the content.
+            <br /><br />
+            Going through the code now in broad terms, we start simply with an
+            array of objects to populate the event table by default. Next we
+            build a dropdown menu by mapping the city properties from each
+            object into an array, importing an appropriate HTML template, and
+            appending the content to the dropdown.
+            <br /><br />
+            Inside of that function, we make sure to call the relevant display
+            functions automatically, showing the user the event data table and
+            updating the statistics. The <b>displayEventData</b> function simply
+            takes the passed in events, clears out the table, and loops through
+            each piece of information re-populating the table, cell by cell, and
+            row by row. <br /><br />
+            In the bottom of this function, we start calling other display
+            functions, so that everything needed to load onto the page is being
+            run automatically. <b>displayStats</b> doesn't get its information
+            from a parameter, but rather from <b>calculateStats</b> which checks
+            for minimum values, averages, and whatever other statistics we want
+            to feature. <br /><br />
+            In order to filter through the data to view events in a particular
+            city, the <b>viewFilteredEvents</b> function sorts through an array
+            of all events and simply runs <b>displayStats</b> as before, passing
+            along only relevant filtered data to be displayed i.e. events in San
+            Diego. <br /><br />
+            Finally, <b>getEventData</b> and <b>saveNewEvent</b> contain my
+            favorite functionalities. By referencing your machine's local
+            storage, each of them are able to manipulate .JSON files, turning
+            the into strings or objects as needed, to execute or store your
+            inputs respectively, even when you refresh or close the page.
+          </p>
         </div>
       </div>
     </main>
@@ -460,7 +501,6 @@ const saveNewEvent = () => {
         </div>
       </div>
     </footer>
-
 
     <!-- Bootstrap -->
     <script
