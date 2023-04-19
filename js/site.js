@@ -255,7 +255,7 @@ const saveNewEvent = () => {
 
   buildDropDown();
 
-  document.getElementById('newEventForm').clear()
+  document.getElementById('newEventForm').reset();
 };
 
 const generateId = () => {
