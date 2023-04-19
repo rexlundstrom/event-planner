@@ -104,7 +104,7 @@ const buildDropDown = () => {
 
   displayEventData(currentEvents);
   displayStats(currentEvents);
-  document.getElementById('location').innerText = 'All Events';
+  document.getElementById("location").innerText = "All Events";
 };
 
 const displayEventData = (currentEvents) => {
@@ -122,8 +122,11 @@ const displayEventData = (currentEvents) => {
     tableRow.querySelector('[data-id="state"]').textContent = event.state;
     tableRow.querySelector('[data-id="attendance"]').textContent =
       event.attendance.toLocaleString();
-    tableRow.querySelector('[data-id="date"]').textContent = new Date(event.date).toLocaleDateString();
+    tableRow.querySelector('[data-id="date"]').textContent = new Date(
+      event.date
+    ).toLocaleDateString();
 
+    tableRow.querySelector("tr").setAttribute("data-event", event.id);
     eventTable.appendChild(tableRow);
   }
 };
@@ -169,10 +172,26 @@ const getEventData = () => {
   let data = localStorage.getItem("stadiumStatsEventData");
 
   if (data == null) {
-    localStorage.setItem("stadiumStatsEventData", JSON.stringify(events));
+    let identifiedEvents = events.map((event) => {
+      event.id = generateId();
+      return event;
+    });
+    localStorage.setItem(
+      "stadiumStatsEventData",
+      JSON.stringify(identifiedEvents)
+    );
+    data = localStorage.getItem("stadiumStatsEventData");
   }
 
-  let currentEvents = data == null ? events : JSON.parse(data);
+  let currentEvents = JSON.parse(data);
+
+  if (currentEvents.some((event) => event.id == undefined)) {
+    currentEvents.forEach((event) => (event.id = generateId()));
+    localStorage.setItem(
+      "stadiumStatsEventData",
+      JSON.stringify(currentEvents)
+    );
+  }
 
   return currentEvents;
 };
@@ -183,7 +202,7 @@ const viewFilteredEvents = (dropDownItem) => {
   // get all events
   let allEvents = getEventData();
 
-  if (cityName == 'All') {
+  if (cityName == "All") {
     displayStats(allEvents);
     displayEventData(allEvents);
     document.getElementById("location").innerText = cityName;
@@ -197,25 +216,25 @@ const viewFilteredEvents = (dropDownItem) => {
   );
 
   // display stats for those events
-    displayStats(filteredEvents);
+  displayStats(filteredEvents);
   // change the stats header
-    document.getElementById('location').innerText = cityName;
+  document.getElementById("location").innerText = cityName;
   // display only those events in the table
   displayEventData(filteredEvents);
 };
 
 const saveNewEvent = () => {
   // get the form input values
-  let name = document.getElementById('eventName').value;
-  let city = document.getElementById('cityName').value;
-  let attendance = parseInt(document.getElementById('attendance').value, 10);
+  let name = document.getElementById("eventName").value;
+  let city = document.getElementById("cityName").value;
+  let attendance = parseInt(document.getElementById("attendance").value, 10);
   // let state = document.getElementById("newEventState");
-  let dateValue = document.getElementById('eventDate').value;
-  dateValue = new Date(dateValue);
+  let dateValue = document.getElementById("eventDate").value;
+  dateValue = new Date(dateValue + ' 00:00');
 
   let date = dateValue.toLocaleDateString();
 
-  let stateSelect = document.getElementById('newEventState');
+  let stateSelect = document.getElementById("newEventState");
   let stateIndex = stateSelect.selectedIndex;
   let state = stateSelect.options[stateIndex].text;
   // create a new event object
@@ -224,8 +243,9 @@ const saveNewEvent = () => {
     city: city,
     state: state,
     attendance: attendance,
-    date: date
-  }
+    date: date,
+    id: generateId()
+  };
   // add it to the array of current events
   let events = getEventData();
   events.push(newEvent);
@@ -234,4 +254,102 @@ const saveNewEvent = () => {
   localStorage.setItem("stadiumStatsEventData", JSON.stringify(events));
 
   buildDropDown();
-}
+
+  document.getElementById('newEventForm').clear()
+};
+
+const generateId = () => {
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+    (
+      c ^
+      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+    ).toString(16)
+  );
+};
+
+const editEvent = (eventRow) => {
+  let eventId = eventRow.getAttribute("data-event");
+
+  let currentEvents = getEventData();
+
+  let eventToEdit = currentEvents.find((event) => event.id == eventId);
+
+  document.getElementById("editEventId").value = eventToEdit.id;
+  document.getElementById("editEventName").value = eventToEdit.event;
+  document.getElementById("editCityName").value = eventToEdit.city;
+  document.getElementById("editAttendance").value = eventToEdit.attendance;
+
+  let eventDate = new Date(eventToEdit.date);
+  let eventDateString = eventDate.toISOString();
+  let dateArray = eventDateString.split("T");
+  let formattedDate = dateArray[0];
+  // let formattedDate = eventDateString.substring(0, 10)
+
+  document.getElementById("editEventDate").value = formattedDate;
+
+  let editStateSelect = document.getElementById("editEventState");
+  let optionsArray = [...editStateSelect.options];
+  let index = optionsArray.findIndex(
+    (option) => eventToEdit.state == option.text
+  );
+  editStateSelect.selectedIndex = index;
+};
+
+const deleteEvent = () => {
+  let eventId = document.getElementById("editEventId").value;
+
+  // get events in local storage as array
+  let currentEvents = getEventData();
+  // filter out event's with that eventId
+  let filteredEvents = currentEvents.filter((event) => event.id != eventId);
+  // save that array to local storage
+  localStorage.setItem("stadiumStatsEventData", JSON.stringify(filteredEvents));
+
+  buildDropDown();
+};
+
+const updateEvent = () => {
+  let eventId = document.getElementById("editEventId").value;
+
+  // get the form input values
+  let name = document.getElementById("editEventName").value;
+  let city = document.getElementById("editCityName").value;
+  let attendance = parseInt(
+    document.getElementById("editAttendance").value,
+    10
+  );
+  // let state = document.getElementById("editEventState");
+  let dateValue = document.getElementById("editEventDate").value;
+  dateValue = new Date(dateValue);
+
+  let date = dateValue.toLocaleDateString();
+
+  let stateSelect = document.getElementById("editEventState");
+  let stateIndex = stateSelect.selectedIndex;
+  let state = stateSelect.options[stateIndex].text;
+
+  const newEvent = {
+    event: name,
+    city: city,
+    state: state,
+    attendance: attendance,
+    date: date,
+    id: eventId,
+  };
+
+  // get events array
+  let currentEvents = getEventData();
+  // find location of OLD event with this ID
+  for (let i = 0; i < currentEvents.length; i++) {
+    if (currentEvents[i].id == eventId) {
+      // replace that event with newEvent
+      currentEvents[i] = newEvent;
+      break;
+    }
+  }
+
+  // save it in local storage
+  localStorage.setItem("stadiumStatsEventData", JSON.stringify(currentEvents));
+
+  buildDropDown();
+};
