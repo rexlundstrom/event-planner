@@ -230,7 +230,7 @@ const saveNewEvent = () => {
   let attendance = parseInt(document.getElementById("attendance").value, 10);
   // let state = document.getElementById("newEventState");
   let dateValue = document.getElementById("eventDate").value;
-  dateValue = new Date(dateValue);
+  dateValue = new Date(dateValue + "T00:00");
 
   let date = dateValue.toLocaleDateString();
 
@@ -320,7 +320,7 @@ const updateEvent = () => {
   );
   // let state = document.getElementById("editEventState");
   let dateValue = document.getElementById("editEventDate").value;
-  dateValue = new Date(dateValue);
+  dateValue = new Date(dateValue + "T00:00");
 
   let date = dateValue.toLocaleDateString();
 
