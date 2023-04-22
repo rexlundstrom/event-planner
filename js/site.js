@@ -70,7 +70,7 @@ const buildDropDown = () => {
   let dropDownMenu = document.getElementById("eventDropDown");
   dropDownMenu.innerHTML = "";
 
-  let currentEvents = getEventData(); // TO - DO: get these from storage
+  let currentEvents = getEventData();
 
   const cityNames = currentEvents.map((event) => event.city);
   const citiesSet = new Set(cityNames);
@@ -255,7 +255,7 @@ const saveNewEvent = () => {
 
   buildDropDown();
 
-  document.getElementById('newEventForm').reset();
+  // document.getElementById('newEventForm').reset();
 };
 
 const generateId = () => {
